@@ -3,6 +3,8 @@ import express from 'express';       // Express — фреймворк для с
 import cors from 'cors';             // CORS — дозволяє іншим сайтам надсилати запити
 import pinoHttp from 'pino-http';    // Pino — виводить лог кожного запиту в консоль
 import contactsRoutes from './routes/contactsRoutes.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
 
 // 2. Створюємо функцію setupServer
@@ -15,12 +17,12 @@ export const setupServer = () => {
   app.use(express.json()); //парсінг тіла запиту
   
   app.use('/contacts', contactsRoutes);//маршрути контактів
+//4. підключення обробників помилок
+  
+  // 4. Підключення обробників помилок
+app.use(notFoundHandler);  // ловить 404
+app.use(errorHandler);     // ловить все інше
 
-  //4. Обробник помилок
-
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });  // Якщо немає такого шляху — повертаємо 404
-  });
 
   // 5. Отримуємо порт зі змінної оточення або 3000
   const PORT = process.env.PORT || 3000;
