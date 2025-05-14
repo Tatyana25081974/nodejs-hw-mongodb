@@ -30,3 +30,8 @@ export const updateContact = async (contactId, payload) => {
 
   return updatedContact; // якщо null → контролер згенерує 404
 };
+
+export const deleteContact = async (id) => {
+  const deleted = await Contact.findByIdAndDelete(id);
+  return deleted;
+};

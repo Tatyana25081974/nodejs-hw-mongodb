@@ -1,6 +1,6 @@
 // src/controllers/contactsController.js
 import createError from 'http-errors'; // для формування помилок
-import { fetchAllContacts, fetchContactById, createContact, updateContact } from '../services/contacts.js';
+import { fetchAllContacts, fetchContactById, createContact, updateContact, deleteContact } from '../services/contacts.js';
 
 export const getAllContacts = async (req, res) => {
   const contacts = await fetchAllContacts();
@@ -60,5 +60,16 @@ export const updateContactController = async (req, res, next) => {
     message: 'Successfully patched a contact!',
     data: updatedContact,
   });
+};
+export const deleteContactController = async (req, res) => {
+  const { contactId } = req.params; 
+
+  const deletedContact = await deleteContact(contactId);
+
+  if (!deletedContact) {
+    throw createError(404, 'Contact not found');
+  }
+
+  res.status(204).send(); // No Content
 };
 
