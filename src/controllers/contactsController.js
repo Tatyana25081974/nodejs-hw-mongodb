@@ -1,9 +1,15 @@
 // src/controllers/contactsController.js
 import createError from 'http-errors'; // для формування помилок
 import { fetchAllContacts, fetchContactById, createContact, updateContact, deleteContact } from '../services/contacts.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+
 
 export const getAllContacts = async (req, res) => {
-  const contacts = await fetchAllContacts();
+  const { page, perPage } = parsePaginationParams(req.query);
+  const contacts = await fetchAllContacts({
+    page,
+    perPage,
+  });
 
   res.status(200).json({
     status: 200,
