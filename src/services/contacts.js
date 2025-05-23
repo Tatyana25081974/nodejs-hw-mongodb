@@ -2,13 +2,20 @@
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
 import { Contact } from '../models/contactModel.js';
+import { SORT_ORDER } from '../constants/index.js';
 
 // Повертає всі документи
-export const fetchAllContacts = async ({ page, perPage }) => {
+export const fetchAllContacts = async ({
+  page,
+  perPage,
+  sortBy = '_id',
+  sortOrder = SORT_ORDER.ASC,}) => {
   const limit = perPage; //кількість контактів на сторінці 
   const skip = page > 0 ? (page - 1) * perPage : 0;// кількість контактів,які треба пропустити 
+
   // Створюємо базовий запит
   const contactsQuery = Contact.find();
+
 
   // Підраховуємо кількість, використовуючи merge з тим же запитом
   const totalItems = await Contact.find()
@@ -16,7 +23,7 @@ export const fetchAllContacts = async ({ page, perPage }) => {
     .countDocuments();//підраховуємо кількість документів
 
   // Отримуємо тільки ті контакти, які потрібні на цій сторінці
-  const contacts = await contactsQuery.skip(skip).limit(limit).exec();
+  const contacts = await contactsQuery.skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).exec();
 
   // Обраховуємо додаткові поля для відповіді
   const paginationData = calculatePaginationData(totalItems, perPage, page);
