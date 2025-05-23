@@ -9,21 +9,41 @@ export const fetchAllContacts = async ({
   page,
   perPage,
   sortBy = '_id',
-  sortOrder = SORT_ORDER.ASC,}) => {
+  sortOrder = SORT_ORDER.ASC,
+  filter = {},
+}) => {
+
   const limit = perPage; //кількість контактів на сторінці 
   const skip = page > 0 ? (page - 1) * perPage : 0;// кількість контактів,які треба пропустити 
 
   // Створюємо базовий запит
   const contactsQuery = Contact.find();
+  if (filter.contactType) {
+    contactsQuery.where('contactType').equals(filter.contactType);
+  }
+  
+  if (typeof filter.isFavourite === 'boolean') {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+  }
 
 
   // Підраховуємо кількість, використовуючи merge з тим же запитом
-  const totalItems = await Contact.find()
-    .merge(contactsQuery) //використовуємо попередній запит 
-    .countDocuments();//підраховуємо кількість документів
+  //const totalItems = await Contact.find()
+   // .merge(contactsQuery) //використовуємо попередній запит 
+    //.countDocuments();//підраховуємо кількість документів
 
   // Отримуємо тільки ті контакти, які потрібні на цій сторінці
-  const contacts = await contactsQuery.skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).exec();
+  //const contacts = await contactsQuery.skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).exec();
+  
+  const [totalItems, contacts] = await Promise.all([
+    Contact.find().merge(contactsQuery).countDocuments(),
+    contactsQuery
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
+  ]);
+  
 
   // Обраховуємо додаткові поля для відповіді
   const paginationData = calculatePaginationData(totalItems, perPage, page);
@@ -33,6 +53,8 @@ export const fetchAllContacts = async ({
     ...paginationData,
   };
 };
+
+
 // Повертає об'єкт контакту по ID або null
 export const fetchContactById = async (id) => {
   return await Contact.findById(id);

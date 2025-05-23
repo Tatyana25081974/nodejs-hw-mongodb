@@ -3,18 +3,22 @@ import createError from 'http-errors'; // для формування помил
 import { fetchAllContacts, fetchContactById, createContact, updateContact, deleteContact } from '../services/contacts.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
+
 
 
 
 export const getAllContacts = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
 
   const contacts = await fetchAllContacts({
     page,
     perPage,
     sortBy,
-  sortOrder,
+    sortOrder,
+    filter,
   });
 
   res.status(200).json({
