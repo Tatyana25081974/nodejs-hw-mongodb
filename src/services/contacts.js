@@ -6,8 +6,7 @@ import { Contact } from '../models/contactModel.js';
 // Повертає всі документи
 export const fetchAllContacts = async ({ page, perPage }) => {
   const limit = perPage; //кількість контактів на сторінці 
-  const skip = (page - 1) * perPage;//кількість контактів які потрібно пропустити 
-
+  const skip = page > 0 ? (page - 1) * perPage : 0;// кількість контактів,які треба пропустити 
   // Створюємо базовий запит
   const contactsQuery = Contact.find();
 
