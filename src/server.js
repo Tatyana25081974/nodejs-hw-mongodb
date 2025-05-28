@@ -2,9 +2,10 @@
 import express from 'express';       // Express — фреймворк для створення сервера
 import cors from 'cors';             // CORS — дозволяє іншим сайтам надсилати запити
 import pinoHttp from 'pino-http';    // Pino — виводить лог кожного запиту в консоль
-import contactsRoutes from './routes/contactsRoutes.js';
+import router from './routers/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import cookieParser from 'cookie-parser';
 
 
 // 2. Створюємо функцію setupServer
@@ -15,8 +16,9 @@ export const setupServer = () => {
   app.use(cors());        // Дозволяє запити з будь-якого джерела
   app.use(pinoHttp());    // Лог кожного запиту
   app.use(express.json()); //парсінг тіла запиту
+  app.use(cookieParser());
   
-  app.use('/contacts', contactsRoutes);//маршрути контактів
+  app.use(router);
 //4. підключення обробників помилок
   
   // 4. Підключення обробників помилок
