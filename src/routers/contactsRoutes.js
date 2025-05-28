@@ -8,12 +8,14 @@ import { validateBody } from '../middlewares/validateBody.js';
 import {
     createContactSchema,
     updateContactSchema
-  } from '../validation/contactsSchema.js';
+} from '../validation/contactsSchema.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 
 const router = express.Router();
 const jsonParser = express.json();
 
+router.use(authenticate);
 router.get('/', ctrlWrapper(getAllContacts)); // GET /contacts
 router.get('/:contactId',isValidID,ctrlWrapper(getContactById)); // GET /contacts/:contactId
 router.post('/',jsonParser,validateBody(createContactSchema), ctrlWrapper(createContactController));//POST/contacts
