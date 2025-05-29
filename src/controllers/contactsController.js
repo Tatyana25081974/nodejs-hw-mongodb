@@ -19,6 +19,7 @@ export const getAllContacts = async (req, res) => {
     sortBy,
     sortOrder,
     filter,
+    userId: req.user._id,
   });
 
   res.status(200).json({
@@ -30,10 +31,11 @@ export const getAllContacts = async (req, res) => {
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await fetchContactById(contactId);
+  const userId = req.user._id; // витягуємо userId з токена
+
+  const contact = await fetchContactById(contactId, userId);
 
   if (!contact) {
-    // Якщо не знайдено — кидаємо помилку, яка піде в errorHandler
     throw createError(404, 'Contact not found');
   }
 
@@ -43,8 +45,14 @@ export const getContactById = async (req, res) => {
     data: contact,
   });
 };
+
 export const createContactController = async (req, res) => {
-  const contact = await createContact(req.body); 
+  const contactData = {
+    ...req.body,
+    userId: req.user._id,
+  }; //обʼєднання даних з форми + userId з токена, яке ми надсилаємо в базу.
+
+  const contact = await createContact(contactData); 
 
   res.status(201).json({
     status: 201,
@@ -53,24 +61,28 @@ export const createContactController = async (req, res) => {
   });
 };
 
-
 export const updateContactController = async (req, res, next) => {
+  //Отримуємо ID контакта з параметрів запиту
   const { contactId } = req.params;
 
-  //  Перевірка: чи щось передано для оновлення
+  // Перевірка: чи передано хоча б одне поле для оновлення
   if (Object.keys(req.body).length === 0) {
-    throw createError(400, 'No data provided for update');
+    throw createError(400, 'No data provided for update'); //  Якщо тіло порожнє, кидаємо помилку
   }
 
-  // 🔄 Оновлюємо контакт
-  const updatedContact = await updateContact(contactId, req.body);
+  //  Отримуємо userId із токена (автентифікації) через middleware authenticate
+  const userId = req.user._id;
 
-  //  Якщо не знайдено
+  //  Оновлюємо контакт через сервісну функцію.
+  // Передаємо ID контакта, userId (для перевірки приналежності), і самі оновлення
+  const updatedContact = await updateContact(contactId, userId, req.body);
+
+  //  Якщо контакт не знайдено або він не належить цьому користувачу
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
 
-  //  Відповідь у разі успіху
+  // ✅ Якщо оновлення успішне — повертаємо відповідь
   res.status(200).json({
     status: 200,
     message: 'Successfully patched a contact!',
@@ -78,14 +90,20 @@ export const updateContactController = async (req, res, next) => {
   });
 };
 export const deleteContactController = async (req, res) => {
-  const { contactId } = req.params; 
+  //  Отримуємо contactId з параметрів маршруту
+  const { contactId } = req.params;
 
-  const deletedContact = await deleteContact(contactId);
+  // Отримуємо userId з req.user, який middleware authenticate додав з access-токена
+  const userId = req.user._id;
 
+  // Видаляємо лише той контакт, який належить цьому користувачу
+  const deletedContact = await deleteContact(contactId, userId);
+
+  // Якщо контакт не знайдено або він чужий
   if (!deletedContact) {
     throw createError(404, 'Contact not found');
   }
 
-  res.status(204).send(); // No Content
+  // Успішно видалено — повертаємо 204 No Content (без тіла відповіді)
+  res.status(204).send();
 };
-

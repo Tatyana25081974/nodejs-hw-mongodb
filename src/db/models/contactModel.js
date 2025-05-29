@@ -23,7 +23,12 @@ const contactSchema = new mongoose.Schema(
       enum: ['work', 'home', 'personal'],  // лише ці 3 варіанти
       required: true,
       default: 'personal',
-    },
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users', //зв’язок із колекцією користувачів
+            required: true,
+          },
   },
   {
     timestamps: true, // ➕ додає createdAt і updatedAt автоматично

@@ -1,7 +1,7 @@
 // src/services/contacts.js
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-import { Contact } from '../models/contactModel.js';
+import { Contact } from '../db/models/contactModel.js';
 import { SORT_ORDER } from '../constants/index.js';
 
 // Повертає всі документи
@@ -11,20 +11,21 @@ export const fetchAllContacts = async ({
   sortBy = '_id',
   sortOrder = SORT_ORDER.ASC,
   filter = {},
+  userId,
 }) => {
 
   const limit = perPage; //кількість контактів на сторінці 
   const skip = page > 0 ? (page - 1) * perPage : 0;// кількість контактів,які треба пропустити 
 
   // Створюємо базовий запит
-  const contactsQuery = Contact.find();
+  const contactsQuery = Contact.find({ userId });
   if (filter.contactType) {
     contactsQuery.where('contactType').equals(filter.contactType);
-  }
+  } //фільтруємо контакти за типом 
   
   if (typeof filter.isFavourite === 'boolean') {
     contactsQuery.where('isFavourite').equals(filter.isFavourite);
-  }
+  } //фільтруємо контакти за значенням isFavourite
 
 
   // Підраховуємо кількість, використовуючи merge з тим же запитом
@@ -36,7 +37,7 @@ export const fetchAllContacts = async ({
   //const contacts = await contactsQuery.skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).exec();
   
   const [totalItems, contacts] = await Promise.all([
-    Contact.find().merge(contactsQuery).countDocuments(),
+    Contact.find({ userId }).merge(contactsQuery).countDocuments(),
     contactsQuery
       .skip(skip)
       .limit(limit)
@@ -56,8 +57,8 @@ export const fetchAllContacts = async ({
 
 
 // Повертає об'єкт контакту по ID або null
-export const fetchContactById = async (id) => {
-  return await Contact.findById(id);
+export const fetchContactById = async (id, userId) => {
+  return await Contact.findOne({ _id: id, userId });
 };
 
 // Створює новий контакт 
@@ -66,9 +67,9 @@ export const createContact = async (payload) => { //payload — це тіло з
   return contact;
 };
 
-export const updateContact = async (contactId, payload) => {
-  const updatedContact = await Contact.findByIdAndUpdate(
-    contactId,
+export const updateContact = async (contactId, payload, userId) => {
+  const updatedContact = await Contact.findOneAndUpdate(
+    { _id: contactId, userId }, // умова: тільки контакт, що належить користувачу
     payload,
     {
       new: true,           // повертає оновлений документ
@@ -79,7 +80,8 @@ export const updateContact = async (contactId, payload) => {
   return updatedContact; // якщо null → контролер згенерує 404
 };
 
-export const deleteContact = async (id) => {
-  const deleted = await Contact.findByIdAndDelete(id);
+export const deleteContact = async (id, userId) => {
+  const deleted = await Contact.findOneAndDelete({ _id: id, userId });
   return deleted;
 };
+
