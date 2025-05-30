@@ -70,12 +70,17 @@ export const updateContactController = async (req, res, next) => {
     throw createError(400, 'No data provided for update'); //  Якщо тіло порожнє, кидаємо помилку
   }
 
+  //  Видаляємо поле userId, якщо воно раптом прийшло в тілі запиту.захист: користувач не може вплинути на userId
+  if ('userId' in req.body) {
+    delete req.body.userId;
+  }
+
   //  Отримуємо userId із токена (автентифікації) через middleware authenticate
   const userId = req.user._id;
 
   //  Оновлюємо контакт через сервісну функцію.
   // Передаємо ID контакта, userId (для перевірки приналежності), і самі оновлення
-  const updatedContact = await updateContact(contactId, userId, req.body);
+  const updatedContact = await updateContact(contactId, req.body, userId);
 
   //  Якщо контакт не знайдено або він не належить цьому користувачу
   if (!updatedContact) {
