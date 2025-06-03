@@ -4,6 +4,19 @@ import { UsersCollection } from '../db/models/user.js';
 import createHttpError from 'http-errors';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
 import { SessionsCollection } from '../db/models/session.js';
+// Імпортуємо бібліотеку для роботи з JWT-токенами (JSON Web Token)
+import jwt from 'jsonwebtoken';
+
+// Імпортуємо обʼєкт із назвами змінних для SMTP (наприклад, SMTP_FROM)
+import { SMTP } from '../constants/index.js';
+
+// Імпортуємо функцію, яка дозволяє безпечно отримувати значення змінних із .env
+import { getEnvVar } from '../utils/getEnvVar.js';
+
+// Імпортуємо функцію надсилання листа
+import { sendEmail } from '../utils/sendMail.js';
+
+
 
 
 export const registerUser = async (payload) => {
@@ -83,6 +96,32 @@ const createSession = () => { //Це функція-шаблон для гене
       userId: session.userId,
       ...newSession,
     });
-  };
+};
+
+// Надсилання токена для скидання пароля
+export const requestResetToken = async (email) => {
+  const user = await UsersCollection.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  //Генеруємо JWT-токен
+  const token = jwt.sign(
+    {
+      sub: user._id,   // sub (subject) — ідентифікатор користувача
+      email,           // додатково додаємо email у токен
+    },
+    getEnvVar('JWT_SECRET'), // секретний ключ (з .env)
+    {
+      expiresIn: '5m', // токен дійсний 5 хвилин
+    },
+  );
+  //Відправляємо лист на пошту користувача
+  await sendEmail({
+    from: getEnvVar(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html: `<p>Click <a href="${getEnvVar('APP_DOMAIN')}/reset-password?token=${token}">here</a> to reset your password!</p>`
+  });
+ };
   
   //refreshUsersSession обробляє запит на оновлення сесії користувача, перевіряє наявність і термін дії існуючої сесії, генерує нову сесію та зберігає її в базі даних.
