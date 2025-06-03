@@ -15,6 +15,17 @@ import { getEnvVar } from '../utils/getEnvVar.js';
 
 // Імпортуємо функцію надсилання листа
 import { sendEmail } from '../utils/sendMail.js';
+// Імпортуємо шаблонізатор Handlebars
+import handlebars from 'handlebars';
+
+// Імпортуємо модуль для роботи з шляхами
+import path from 'node:path';
+
+// Імпортуємо модуль для асинхронної роботи з файловою системою
+import fs from 'node:fs/promises';
+// Імпортуємо константу для базової директорії шаблонів
+import { TEMPLATES_DIR } from '../constants/index.js';
+
 
 
 
@@ -100,7 +111,9 @@ const createSession = () => { //Це функція-шаблон для гене
 
 // Надсилання токена для скидання пароля
 export const requestResetToken = async (email) => {
+  // // Шукаємо користувача за email в базі даних
   const user = await UsersCollection.findOne({ email });
+  // Якщо користувача не знайдено — кидаємо помилку 404
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
@@ -115,13 +128,35 @@ export const requestResetToken = async (email) => {
       expiresIn: '5m', // токен дійсний 5 хвилин
     },
   );
-  //Відправляємо лист на пошту користувача
-  await sendEmail({
-    from: getEnvVar(SMTP.SMTP_FROM),
-    to: email,
-    subject: 'Reset your password',
-    html: `<p>Click <a href="${getEnvVar('APP_DOMAIN')}/reset-password?token=${token}">here</a> to reset your password!</p>`
+  // Формуємо абсолютний шлях до HTML-шаблону листа
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR, // базова директорія шаблонів
+    'reset-password-email.html', // назва конкретного шаблону
+  );
+
+  // Зчитуємо вміст шаблону з HTML-файлу у вигляді тексту
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString(); // перетворюємо Buffer у текст (HTML)
+
+  // Компілюємо HTML-шаблон у функцію, яка приймає динамічні дані
+  const template = handlebars.compile(templateSource);
+
+  // Викликаємо шаблон, підставляючи змінні name та link
+  const html = template({
+    name: user.name, // привітання в листі
+    link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${token}`, // посилання з токеном
   });
- };
+
+ // Відправляємо email з відновленням паролю
+ await sendEmail({
+  from: getEnvVar(SMTP.SMTP_FROM), // від кого (з .env)
+  to: email,                       // кому
+  subject: 'Reset your password', // тема листа
+  html,                           // html-тіло, згенероване шаблонізатором
+});
+};
+
+  
   
   //refreshUsersSession обробляє запит на оновлення сесії користувача, перевіряє наявність і термін дії існуючої сесії, генерує нову сесію та зберігає її в базі даних.
