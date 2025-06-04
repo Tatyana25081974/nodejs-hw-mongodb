@@ -157,6 +157,44 @@ export const requestResetToken = async (email) => {
 });
 };
 
+
+//зміни пароля після переходу за email-посиланням
+export const resetPassword = async (payload) => {
+  let entries;
+
+  try {
+    // Перевіряємо токен на валідність та розшифровуємо його
+    // Витягуємо з нього email і sub (user._id)
+    entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
+  } catch (err) {
+    // Якщо токен недійсний або прострочений — повертаємо помилку 401
+    if (err instanceof Error) throw createHttpError(401, err.message);
+    throw err;
+  }
+
+  // Шукаємо користувача за email та ID, витягнутими з токена
+  const user = await UsersCollection.findOne({
+    email: entries.email,
+    _id: entries.sub,
+  });
+
+  // Якщо користувача не знайдено — повертаємо помилку 404
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  // Хешуємо новий пароль
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
+  // Оновлюємо пароль користувача в базі даних
+  await UsersCollection.updateOne(
+    { _id: user._id }, // Знаходимо користувача за ID
+    { password: encryptedPassword }, // Оновлюємо його пароль
+  );
+};
+
+
+
   
   
   //refreshUsersSession обробляє запит на оновлення сесії користувача, перевіряє наявність і термін дії існуючої сесії, генерує нову сесію та зберігає її в базі даних.

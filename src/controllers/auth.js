@@ -5,6 +5,7 @@ import { logoutUser } from '../services/auth.js';
 import { refreshUsersSession } from '../services/auth.js';
 import { requestResetToken } from '../services/auth.js';
 import createHttpError from 'http-errors'; // Імпортуємо createHttpError — для створення HTTP-помилок зі статусом 
+import { resetPassword } from '../services/auth.js'; 
 
 export const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
@@ -99,5 +100,14 @@ export const requestResetEmailController = async (req, res) => {
     // 5️⃣ Якщо сталася будь-яка інша помилка (наприклад, не вдалося надіслати листа)
     throw createHttpError(500, 'Failed to send the email, please try again later.');
   }
+};
+// Контролер для POST /auth/reset-password
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset!',
+    status: 200,
+    data: {},
+  });
 };
 
