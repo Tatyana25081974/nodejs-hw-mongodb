@@ -4,6 +4,7 @@ import { fetchAllContacts, fetchContactById, createContact, updateContact, delet
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 
 
@@ -50,6 +51,7 @@ export const createContactController = async (req, res) => {
   const contactData = {
     ...req.body,
     userId: req.user._id,
+    photo: req.file ? req.file.path : undefined,
   }; //обʼєднання даних з форми + userId з токена, яке ми надсилаємо в базу.
 
   const contact = await createContact(contactData); 
@@ -77,6 +79,11 @@ export const updateContactController = async (req, res, next) => {
 
   //  Отримуємо userId із токена (автентифікації) через middleware authenticate
   const userId = req.user._id;
+
+  // Якщо завантажено нове фото — додаємо до тіла запиту
+  if (req.file) {
+    req.body.photo = req.file.path;
+  }
 
   //  Оновлюємо контакт через сервісну функцію.
   // Передаємо ID контакта, userId (для перевірки приналежності), і самі оновлення
@@ -111,4 +118,34 @@ export const deleteContactController = async (req, res) => {
 
   // Успішно видалено — повертаємо 204 No Content (без тіла відповіді)
   res.status(204).send();
+};
+
+
+
+
+export const patchContactController = async (req, res, next) => { //е з тіла запиту (req.body) і файлом (req.file), який передає multer.
+  const { contactsId } = req.params;
+  const photo = req.file;
+
+  let photoUrl; //змінна для зберігання URL фото
+
+  if (photo) {
+    photoUrl = await saveFileToUploadDir(photo);
+  }
+// Оновлюємо контакт 
+  const result = await updateContact(contactsId, {
+    ...req.body,
+    photo: photoUrl,
+  });
+
+  if (!result) {
+    next(createError(404, 'Contact not found'));
+    return;
+  }
+
+  res.json({
+    status: 200,
+    message: `Successfully patched a contact!`,
+    data: result.contact,
+  });
 };

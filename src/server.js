@@ -6,6 +6,7 @@ import router from './routers/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/index.js';
 
 
 // 2. Створюємо функцію setupServer
@@ -23,7 +24,10 @@ export const setupServer = () => {
   
   // 4. Підключення обробників помилок
 app.use(notFoundHandler);  // ловить 404
-app.use(errorHandler);     // ловить все інше
+  app.use(errorHandler);     // ловить все інше
+
+  //підключаємо статичну папку uploads
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
 
   // 5. Отримуємо порт зі змінної оточення або 3000
