@@ -5,6 +5,8 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
 
 
@@ -122,23 +124,26 @@ export const deleteContactController = async (req, res) => {
   // Успішно видалено — повертаємо 204 No Content (без тіла відповіді)
   res.status(204).send();
 };
-
-
-
-
 export const patchContactController = async (req, res, next) => { 
   const { contactId } = req.params;
   const photo = req.file;
 
-  let photoUrl; //змінна для зберігання URL фото
+  let photoUrl; // змінна для зберігання URL фото
 
   if (photo) {
-    photoUrl = await saveFileToUploadDir(photo);
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      console.log('Uploading to Cloudinary...');
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      console.log('Uploading locally...');
+      photoUrl = await saveFileToUploadDir(photo);
+    }
   }
-// Оновлюємо контакт 
+
+  // Оновлюємо контакт
   const result = await updateContact(contactId, {
     ...req.body,
-    photo: photoUrl,
+    photo: photoUrl, // може бути undefined, якщо фото не завантажено
   });
 
   if (!result) {
@@ -152,3 +157,7 @@ export const patchContactController = async (req, res, next) => {
     data: result,
   });
 };
+
+
+
+
