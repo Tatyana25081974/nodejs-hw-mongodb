@@ -1,40 +1,39 @@
 // 1. Імпортуємо бібліотеки
-import express from 'express';       // Express — фреймворк для створення сервера
-import cors from 'cors';             // CORS — дозволяє іншим сайтам надсилати запити
-import pinoHttp from 'pino-http';    // Pino — виводить лог кожного запиту в консоль
-import router from './routers/index.js';
-import { errorHandler } from './middlewares/errorHandler.js';
-import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import cookieParser from 'cookie-parser';
-import { UPLOAD_DIR } from './constants/index.js';
+import express from 'express';           // Express — фреймворк для створення сервера
+import cors from 'cors';                 // CORS — дозволяє крос-доменно робити запити
+import pinoHttp from 'pino-http';        // Pino — для логування запитів у консоль
+import cookieParser from 'cookie-parser';// Для роботи з куками
 
+import router from './routers/index.js'; // Основний роутер (він підключає всі маршрути)
+import { errorHandler } from './middlewares/errorHandler.js';       // Обробка помилок
+import { notFoundHandler } from './middlewares/notFoundHandler.js'; // Обробка 404
+import { UPLOAD_DIR } from './constants/index.js';                  // Шлях до папки /uploads
 
-// 2. Створюємо функцію setupServer
+// 2. Створюємо та запускаємо сервер
 export const setupServer = () => {
-  const app = express(); // створення екземпляру сервера
+  const app = express(); // Створюємо екземпляр додатку Express
 
-  // 3. Підключення middleware
-  app.use(cors());        // Дозволяє запити з будь-якого джерела
-  app.use(pinoHttp());    // Лог кожного запиту
-  app.use(express.json()); //парсінг тіла запиту
-  app.use(cookieParser());
-  
-  app.use(router);
-//4. підключення обробників помилок
-  
-  // 4. Підключення обробників помилок
-app.use(notFoundHandler);  // ловить 404
-  app.use(errorHandler);     // ловить все інше
+  // 3. Middleware
+  app.use(cors()); // Дозволяє запити з будь-якого джерела
+  app.use(pinoHttp()); // Логи всіх запитів
+  app.use(express.json()); // Парсинг JSON з тіла запиту
+  app.use(cookieParser()); // Куки зчитуються і зберігаються в req.cookies
 
-  //підключаємо статичну папку uploads
+  // ✅ Додаємо можливість роздавати статичні файли з папки uploads
   app.use('/uploads', express.static(UPLOAD_DIR));
 
+  // 4. Підключаємо роутер (всі маршрути, наприклад /contacts)
+  app.use(router);
 
-  // 5. Отримуємо порт зі змінної оточення або 3000
+  // 5. Обробники помилок
+  app.use(notFoundHandler); // 404 — якщо маршрут не знайдено
+  app.use(errorHandler);    // 500 — якщо сталася помилка у коді
+
+  // 6. Порт із .env або 3000
   const PORT = process.env.PORT || 3000;
 
-  // 6. Запускаємо сервер
+  // 7. Запуск сервера
   app.listen(PORT, () => {
-    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`✅ Server is running on http://localhost:${PORT}`);
   });
 };
