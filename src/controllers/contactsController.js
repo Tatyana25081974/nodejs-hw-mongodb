@@ -46,23 +46,27 @@ export const getContactById = async (req, res) => {
     data: contact,
   });
 };
-
 export const createContactController = async (req, res) => {
   const contactData = {
     ...req.body,
-    userId: req.user._id,
-    photo: req.file ? req.file.path : undefined,
-  }; //обʼєднання даних з форми + userId з токена, яке ми надсилаємо в базу.
+    userId: req.user._id, // додаємо userId з токена
+  };
 
-  const contact = await createContact(contactData); 
+  // Якщо було завантажено файл — обробляємо його
+  if (req.file) {
+    contactData.photo = await saveFileToUploadDir(req.file); // зберігаємо публічне посилання
+  }
 
+  // Створюємо контакт
+  const contact = await createContact(contactData);
+
+  // Відповідь
   res.status(201).json({
     status: 201,
     message: `Successfully created a contact!`,
     data: contact,
   });
 };
-
 export const updateContactController = async (req, res, next) => {
   //Отримуємо ID контакта з параметрів запиту
   const { contactId } = req.params;
@@ -82,9 +86,8 @@ export const updateContactController = async (req, res, next) => {
 
   // Якщо завантажено нове фото — додаємо до тіла запиту
   if (req.file) {
-    req.body.photo = req.file.path;
+    req.body.photo = await saveFileToUploadDir(req.file);
   }
-
   //  Оновлюємо контакт через сервісну функцію.
   // Передаємо ID контакта, userId (для перевірки приналежності), і самі оновлення
   const updatedContact = await updateContact(contactId, req.body, userId);
@@ -123,8 +126,8 @@ export const deleteContactController = async (req, res) => {
 
 
 
-export const patchContactController = async (req, res, next) => { //е з тіла запиту (req.body) і файлом (req.file), який передає multer.
-  const { contactsId } = req.params;
+export const patchContactController = async (req, res, next) => { 
+  const { contactId } = req.params;
   const photo = req.file;
 
   let photoUrl; //змінна для зберігання URL фото
@@ -133,7 +136,7 @@ export const patchContactController = async (req, res, next) => { //е з тіл
     photoUrl = await saveFileToUploadDir(photo);
   }
 // Оновлюємо контакт 
-  const result = await updateContact(contactsId, {
+  const result = await updateContact(contactId, {
     ...req.body,
     photo: photoUrl,
   });
@@ -146,6 +149,6 @@ export const patchContactController = async (req, res, next) => { //е з тіл
   res.json({
     status: 200,
     message: `Successfully patched a contact!`,
-    data: result.contact,
+    data: result,
   });
 };

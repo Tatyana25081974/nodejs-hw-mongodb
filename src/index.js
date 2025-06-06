@@ -1,4 +1,6 @@
 // src/index.js
+
+// src/index.js
 import dotenv from 'dotenv';
 dotenv.config(); // Завантажує .env змінні в process.env
 
