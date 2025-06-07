@@ -14,11 +14,11 @@ import { CLOUDINARY } from '../constants/index.js';
 //Налаштування доступу до Cloudinary:
 
 cloudinary.v2.config({
-    secure: true, // Завантаження через HTTPS
-    cloud_name: getEnvVar(CLOUDINARY.CLOUD_NAME), // наприклад 'my-cloud'
-    api_key: getEnvVar(CLOUDINARY.API_KEY),       // твій публічний ключ
-    api_secret: getEnvVar(CLOUDINARY.API_SECRET), // секретний ключ
-  });
+  secure: true,
+  cloud_name: getEnvVar(CLOUDINARY.CLOUD_NAME),
+  api_key: getEnvVar(CLOUDINARY.API_KEY),
+  api_secret: getEnvVar(CLOUDINARY.API_SECRET),
+});
   
   export const saveFileToCloudinary = async (file) => {
     // Завантажуємо тимчасовий файл у Cloudinary
