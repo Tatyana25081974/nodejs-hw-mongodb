@@ -56,7 +56,13 @@ export const createContactController = async (req, res) => {
 
   // Якщо було завантажено файл — обробляємо його
   if (req.file) {
-    contactData.photo = await saveFileToUploadDir(req.file); // зберігаємо публічне посилання
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      console.log('Uploading to Cloudinary...');
+      contactData.photo = await saveFileToCloudinary(req.file);
+    } else {
+      console.log('Uploading locally...');
+      contactData.photo = await saveFileToUploadDir(req.file);
+    }
   }
 
   // Створюємо контакт
@@ -88,7 +94,11 @@ export const updateContactController = async (req, res, next) => {
 
   // Якщо завантажено нове фото — додаємо до тіла запиту
   if (req.file) {
-    req.body.photo = await saveFileToUploadDir(req.file);
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      req.body.photo = await saveFileToCloudinary(req.file);
+    } else {
+      req.body.photo = await saveFileToUploadDir(req.file);
+    }
   }
   //  Оновлюємо контакт через сервісну функцію.
   // Передаємо ID контакта, userId (для перевірки приналежності), і самі оновлення
