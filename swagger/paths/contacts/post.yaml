@@ -1,0 +1,63 @@
+tags:
+  - Contacts #маршрут належить до групи Contacts
+
+summary: Create a new contact
+operationId: createContact #унікальний ідентифікатор
+description: Adds a new contact for the authenticated user.
+
+security:
+  - bearerAuth: [] # доступ до цього маршруту потребує авторизації через Bearer Token (JWT).
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required:
+          - name
+          - phoneNumber
+          - contactType
+        properties:
+          name:
+            type: string
+            example: 'John Doe'
+          phoneNumber:
+            type: string
+            example: '1234567890'
+          email:
+            type: string
+            example: 'example@example.com'
+          isFavourite:
+            type: boolean
+            example: false
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            example: 'home'
+          photo:
+            type: string
+            format: binary
+
+responses:
+  '201':
+    description: Contact created successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: Contact successfully created!
+            data:
+              $ref: '../../../components/schemas/contact.yaml'
+  '400':
+    $ref: '../../../components/responses/400.yaml'
+  '401':
+    $ref: '../../../components/responses/401.yaml'
+  '500':
+    $ref: '../../../components/responses/500.yaml'

@@ -1,0 +1,30 @@
+tags:
+  - Contacts
+
+summary: Delete a contact
+operationId: deleteContact
+
+description: Deletes a contact by its ID.
+security:
+  - bearerAuth: []
+parameters:
+  - in: path # Параметр у шляху URL
+    name: id # Назва параметра — це /contacts/{id}
+    required: true
+    schema:
+      type: string
+      example: 65ca67e7ae7f10c88b598384
+    description: ID of the contact to delete
+
+responses:
+  '204': # Стандартна відповідь при успішному видаленні (No Content)
+    description: Contact successfully deleted
+
+  '401': # Якщо користувач не авторизований (не надіслав токен або токен недійсний)
+    $ref: '../../../components/responses/401.yaml'
+
+  '404': # Якщо контакт з таким ID не знайдено
+    $ref: '../../../components/responses/404.yaml'
+
+  '500': # Помилка сервера
+    $ref: '../../../components/responses/500.yaml'

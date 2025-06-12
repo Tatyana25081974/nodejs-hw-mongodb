@@ -1,0 +1,79 @@
+tags:
+  - Contacts
+
+summary: Update a contact
+operationId: updateContact
+
+description: Updates an existing contact by its ID.
+
+security:
+  - bearerAuth: [] # Авторизація через Bearer Token (JWT)
+
+parameters:
+  - in: path # Тип параметра — шляховий параметр у URL
+    name: contactId # Назва параметра — /contacts/{contactId}
+    required: true
+    schema:
+      type: string
+      example: 65ca67e7ae7f10c88b598384
+    description: ID of the contact to update
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Jane Doe'
+        phoneNumber:
+          type: string
+          example: '9876543210'
+        email:
+          type: string
+          example: 'jane@example.com'
+        isFavourite:
+          type: boolean
+          example: true
+        contactType:
+          type: string
+          enum: [work, home, personal]
+          example: home
+        photo:
+          type: string
+          format: binary
+          description: Updated contact photo
+
+responses:
+  '200': # Успішне оновлення
+    description: Contact updated successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Contact updated successfully!
+            data:
+              $ref: '../../../components/schemas/contact.yaml' # Оновлений об'єкт контакту
+
+  '400': # Невалідні дані
+    $ref: '../../../components/responses/400.yaml'
+
+  '401': # Без авторизації
+    $ref: '../../../components/responses/401.yaml'
+
+  '404': # Контакт не знайдено
+    $ref: '../../../components/responses/404.yaml'
+
+  '500': # Помилка сервера
+    $ref: '../../../components/responses/500.yaml'

@@ -1,0 +1,94 @@
+parameters:
+  - in: query # Тип параметра — query (рядок URL)
+    name: type
+    schema:
+      type: string
+      enum: [work, home, personal] # Можливі значення
+    description: Filter by contact type
+
+  - in: query
+    name: isFavourite
+    schema:
+      type: boolean
+    description: Filter by favourite status (true/false)
+
+  - in: query
+    name: page
+    schema:
+      type: integer
+      default: 1
+    description: Page number for pagination
+
+  - in: query
+    name: perPage
+    schema:
+      type: integer
+      default: 10
+    description: Number of contacts to return per page
+
+  - in: query
+    name: sortBy
+    schema:
+      type: string
+      enum: [name, email, contactType] # Поля, за якими можна сортувати
+    description: Field to sort by
+
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum: [asc, desc] # Напрямок сортування: за зростанням або спаданням
+    description: Sort order
+
+responses:
+  '200': # Успішна відповідь
+    description: A list of contacts
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+            - page
+            - perPage
+            - totalItems
+            - totalPages
+            - hasPreviousPage
+            - hasNextPage
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully fetched contacts!
+            data:
+              type: array
+              items:
+                $ref: '../../../components/schemas/contact.yaml' # Список контактів
+            page:
+              type: integer
+              example: 1
+            perPage:
+              type: integer
+              example: 10
+            totalItems:
+              type: integer
+              example: 42 # Скільки контактів загалом знайдено
+            totalPages:
+              type: integer
+              example: 5
+            hasPreviousPage:
+              type: boolean
+              example: false
+            hasNextPage:
+              type: boolean
+              example: true
+
+  '401': # Якщо токен не передано або він недійсний
+    $ref: '../../../components/responses/401.yaml'
+
+  '500': # Якщо виникла серверна помилка
+    $ref: '../../../components/responses/500.yaml'

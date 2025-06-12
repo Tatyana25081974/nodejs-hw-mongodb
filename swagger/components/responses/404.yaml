@@ -1,0 +1,15 @@
+description: Resource not found # Загальний опис — ресурс не знайдено
+content:
+  application/json: # Тип відповіді — JSON
+    schema:
+      type: object # Відповідь — об'єкт
+      required: # Обов'язкові поля у відповіді
+        - status
+        - message
+      properties: # Поля об'єкта відповіді
+        status:
+          type: integer # Числове значення статусу
+          example: 404 # Код помилки — 404 Not Found
+        message:
+          type: string # Текстове повідомлення
+          example: Contact not found # Повідомлення про помилку

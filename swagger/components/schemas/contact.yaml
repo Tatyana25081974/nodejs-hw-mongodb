@@ -1,0 +1,50 @@
+type: object
+
+required: #Обов'язкові поля
+  - _id
+  - name
+  - phoneNumber
+  - userId
+  - contactType
+
+properties:
+  _id:
+    description: The ID of the contact
+    type: string
+    example: 65ca67e7ae7f10c88b598384
+
+  name:
+    description: The name of the contact
+    type: string
+    example: 'John Doe'
+
+  phoneNumber:
+    description: The phone number of the contact
+    type: string
+    example: '1234567890'
+
+  email:
+    description: The email of the contact
+    type: string
+    example: 'qJ5Lm@example.com'
+
+  isFavourite:
+    description: Whether the contact is a favourite
+    type: boolean
+    example: true
+
+  contactType:
+    description: The type of the contact
+    type: string
+    enum: [work, home, personal]
+    example: 'personal'
+
+  photo:
+    description: The URL of the contact photo
+    type: string
+    example: 'https://res.cloudinary.com/uqwgdu/image/upload/image.png'
+
+  userId:
+    description: The ID of the user who owns the contact
+    type: string
+    example: 65ca67e7ae7f10c88b598384

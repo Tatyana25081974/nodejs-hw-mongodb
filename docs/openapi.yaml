@@ -1,0 +1,43 @@
+openapi: 3.1.0 # Вказує версію специфікації OpenAPI, яка використовується (3.1.0 — найновіша стабільна)
+
+info:
+  version: 1.0.0 # Версія API
+  title: Contacts app # Назва API
+  license:
+    name: Apache 2.0 # Назва ліцензії
+    url: http://www.apache.org/licenses/LICENSE-2.0.html # Посилання на текст ліцензії
+  description: API for managing user contacts:creating, viewing, updating, and deleting. # Опис API: призначення, функціональність, цільова аудиторія тощо
+
+tags:
+  - name: Contacts
+    description: Operations with contacts.
+  - name: Auth
+    description: Auth operations.
+servers:
+  - url: http://localhost:3000
+    description: Локальний сервер для розробки
+  - url: https://nodejs-hw-mongodb-iy1l.onrender.com/api
+    description: Продакшн-сервер на Render
+
+paths:
+  /contacts/{contactId}:
+    patch:
+      $ref: ../swagger/paths/contacts/{id}/patch.yaml
+  /contacts/{id}:
+    delete:
+      $ref: ../swagger/paths/contacts/{id}/delete.yaml
+  /contacts:
+    get:
+      $ref: ../swagger/paths/contacts/get.yaml
+  /contacts:
+    post:
+      $ref: ../swagger/paths/contacts/post.yaml
+  /contacts/{id}:
+    get:
+      $ref: ../swagger/paths/contacts/{id}/get.yaml
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http # Тип автентифікації — HTTP
+      scheme: bearer # Схема — Bearer Token
