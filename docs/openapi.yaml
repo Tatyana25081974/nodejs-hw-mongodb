@@ -16,7 +16,7 @@ tags:
 servers:
   - url: http://localhost:3000
     description: Локальний сервер для розробки
-  - url: https://nodejs-hw-mongodb-iy1l.onrender.com/api
+  - url: https://nodejs-hw-mongodb-iy1l.onrender.com
     description: Продакшн-сервер на Render
 
 paths:
