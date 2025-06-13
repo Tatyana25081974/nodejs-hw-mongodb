@@ -9,7 +9,7 @@ security:
   - bearerAuth: []
 parameters:
   - in: path # Параметр у шляху URL
-    name: id # Назва параметра — це /contacts/{id}
+    name: contactId
     required: true
     schema:
       type: string

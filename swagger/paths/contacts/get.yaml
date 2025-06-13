@@ -1,9 +1,19 @@
+tags:
+  - Contacts
+
+summary: Get all contacts
+operationId: getAllContacts
+description: Returns a list of user contacts with filtering, sorting, and pagination.
+
+security:
+  - bearerAuth: []
+
 parameters:
-  - in: query # Тип параметра — query (рядок URL)
+  - in: query
     name: type
     schema:
       type: string
-      enum: [work, home, personal] # Можливі значення
+      enum: [work, home, personal]
     description: Filter by contact type
 
   - in: query
@@ -24,24 +34,24 @@ parameters:
     schema:
       type: integer
       default: 10
-    description: Number of contacts to return per page
+    description: Number of contacts per page
 
   - in: query
     name: sortBy
     schema:
       type: string
-      enum: [name, email, contactType] # Поля, за якими можна сортувати
+      enum: [name, email, contactType]
     description: Field to sort by
 
   - in: query
     name: sortOrder
     schema:
       type: string
-      enum: [asc, desc] # Напрямок сортування: за зростанням або спаданням
-    description: Sort order
+      enum: [asc, desc]
+    description: Sort direction (ascending or descending)
 
 responses:
-  '200': # Успішна відповідь
+  '200':
     description: A list of contacts
     content:
       application/json:
@@ -67,7 +77,7 @@ responses:
             data:
               type: array
               items:
-                $ref: '../../../components/schemas/contact.yaml' # Список контактів
+                $ref: '../../components/schemas/contact.yaml'
             page:
               type: integer
               example: 1
@@ -76,7 +86,7 @@ responses:
               example: 10
             totalItems:
               type: integer
-              example: 42 # Скільки контактів загалом знайдено
+              example: 42
             totalPages:
               type: integer
               example: 5
@@ -87,8 +97,8 @@ responses:
               type: boolean
               example: true
 
-  '401': # Якщо токен не передано або він недійсний
-    $ref: '../../../components/responses/401.yaml'
+  '401':
+    $ref: '../../components/responses/401.yaml'
 
-  '500': # Якщо виникла серверна помилка
-    $ref: '../../../components/responses/500.yaml'
+  '500':
+    $ref: '../../components/responses/500.yaml'

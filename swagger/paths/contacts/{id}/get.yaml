@@ -10,7 +10,7 @@ security:
 
 parameters:
   - in: path
-    name: id
+    name: contactId
     required: true
     schema:
       type: string

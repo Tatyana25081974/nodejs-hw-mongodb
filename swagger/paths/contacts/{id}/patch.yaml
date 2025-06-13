@@ -3,15 +3,14 @@ tags:
 
 summary: Update a contact
 operationId: updateContact
-
 description: Updates an existing contact by its ID.
 
 security:
-  - bearerAuth: [] # Авторизація через Bearer Token (JWT)
+  - bearerAuth: []
 
 parameters:
-  - in: path # Тип параметра — шляховий параметр у URL
-    name: contactId # Назва параметра — /contacts/{contactId}
+  - in: path
+    name: contactId
     required: true
     schema:
       type: string
@@ -22,31 +21,32 @@ requestBody:
   required: true
   content:
     multipart/form-data:
-      type: object
-      properties:
-        name:
-          type: string
-          example: 'Jane Doe'
-        phoneNumber:
-          type: string
-          example: '9876543210'
-        email:
-          type: string
-          example: 'jane@example.com'
-        isFavourite:
-          type: boolean
-          example: true
-        contactType:
-          type: string
-          enum: [work, home, personal]
-          example: home
-        photo:
-          type: string
-          format: binary
-          description: Updated contact photo
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            example: 'Jane Doe'
+          phoneNumber:
+            type: string
+            example: '9876543210'
+          email:
+            type: string
+            example: 'jane@example.com'
+          isFavourite:
+            type: boolean
+            example: true
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            example: home
+          photo:
+            type: string
+            format: binary
+            description: Updated contact photo
 
 responses:
-  '200': # Успішне оновлення
+  '200':
     description: Contact updated successfully
     content:
       application/json:
@@ -64,16 +64,16 @@ responses:
               type: string
               example: Contact updated successfully!
             data:
-              $ref: '../../../components/schemas/contact.yaml' # Оновлений об'єкт контакту
+              $ref: '../../../components/schemas/contact.yaml'
 
-  '400': # Невалідні дані
+  '400':
     $ref: '../../../components/responses/400.yaml'
 
-  '401': # Без авторизації
+  '401':
     $ref: '../../../components/responses/401.yaml'
 
-  '404': # Контакт не знайдено
+  '404':
     $ref: '../../../components/responses/404.yaml'
 
-  '500': # Помилка сервера
+  '500':
     $ref: '../../../components/responses/500.yaml'
