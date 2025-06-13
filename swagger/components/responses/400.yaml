@@ -6,10 +6,17 @@ content:
       required:
         - status
         - message
+        - data
       properties:
         status:
           type: integer
           example: 400
         message:
           type: string
-          example: Validation failed:"phoneNumber" is required
+          example: BadRequestError
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Access token expired

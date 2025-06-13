@@ -6,6 +6,7 @@ content:
       required: # Обов'язкові поля у відповіді
         - status
         - message
+        - error
       properties: # Поля об'єкта відповіді
         status:
           type: integer # Числове значення статусу
@@ -13,3 +14,6 @@ content:
         message:
           type: string # Текстове повідомлення
           example: Something went wrong on the server # Текст помилки
+        error:
+          type: string
+          example: InternalServerError
